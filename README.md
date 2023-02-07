@@ -1,2 +1,13 @@
 # groovy-sublime
-Groove Sublime Plugin
+Groove Sublime
+
+
+## USAGE
+
+
+Install
+
+	npm npm-groovy-lint
+
+Clone https://github.com/mobilemindtec/groovy-sublime.git to ~/.config/sublime-text-3/Packages/
+
