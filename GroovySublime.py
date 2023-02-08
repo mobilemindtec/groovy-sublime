@@ -21,7 +21,7 @@ class GroovyFormatCommand(sublime_plugin.TextCommand):
            "--output", 
            "json", 
            "--config", 
-           "%s/.groovylintrc-recommended.json" % current, 
+           "%s/groovylintrc-recommended.json" % current, 
            fname]
     print("cmd = %s" % " ".join(cmd))
     stdout, stderr = subprocess.Popen(
@@ -36,6 +36,8 @@ class GroovyFormatCommand(sublime_plugin.TextCommand):
     #  print(stdout.decode('UTF-8'))
     #else:
 
+    sublime.status_message("Build finished")
+
     try:
       r = json.loads(stdout.decode('UTF-8'))
 
@@ -44,8 +46,10 @@ class GroovyFormatCommand(sublime_plugin.TextCommand):
 
         #print("success %s" % updatedSource)
         self.view.replace(edit, region, updatedSource)
-    except e:
-      print("GroovyFormat error: %s" % e)
+    except Exception as e:
+      print("GroovyFormat fail: %s" % e)
+      print("GroovyFormat ERROR: %s" % stderr.strip().decode())
+      print("GroovyFormat RESULT: %s" % stdout.decode('UTF-8'))
 
 def check_is_enabled_file(file_name):    
   types = ['.groovy']
