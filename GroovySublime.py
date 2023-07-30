@@ -14,6 +14,10 @@ class GroovyFormatCommand(sublime_plugin.TextCommand):
     current = pathlib.Path(__file__).parent.resolve()
     print("current = %s" % current)
 
+    tmp_file = "/tmp/code.groovy"
+    with open(tmp_file, 'w') as f:
+        f.write(content)
+
     cmd = ["npm-groovy-lint", 
            "--serverhost", 
            "http://127.0.0.1", 
@@ -22,7 +26,7 @@ class GroovyFormatCommand(sublime_plugin.TextCommand):
            "json", 
            "--config", 
            "%s/groovylintrc-recommended.json" % current, 
-           fname]
+           tmp_file]
     print("cmd = %s" % " ".join(cmd))
     stdout, stderr = subprocess.Popen(
       [" ".join(cmd)],
@@ -41,11 +45,13 @@ class GroovyFormatCommand(sublime_plugin.TextCommand):
     try:
       r = json.loads(stdout.decode('UTF-8'))
 
-      if 'files' in r and fname in r['files'] and 'updatedSource' in r['files'][fname]:
-        updatedSource = r['files'][fname]['updatedSource']
+      if 'files' in r and tmp_file in r['files'] and 'updatedSource' in r['files'][tmp_file]:
+        updatedSource = r['files'][tmp_file]['updatedSource']
 
         #print("success %s" % updatedSource)
         self.view.replace(edit, region, updatedSource)
+      else:
+        sublime.error_message(stdout.decode('UTF-8'))
     except Exception as e:
       print("GroovyFormat fail: %s" % e)
       print("GroovyFormat ERROR: %s" % stderr.strip().decode())
@@ -62,7 +68,7 @@ def check_is_enabled_file(file_name):
 class GroovyEventDump(sublime_plugin.EventListener):
 
       
-  def on_post_save(self, view):
+  def on_pre_save(self, view):
     if check_is_enabled_file(view.file_name()):
       view.run_command('groovy_format')
 
